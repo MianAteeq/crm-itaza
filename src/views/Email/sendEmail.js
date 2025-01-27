@@ -26,8 +26,11 @@ import { useNavigate } from 'react-router-dom'
 import { savedLogs } from '../../helpers/helper'
 import Select from 'react-select'
 import axios from 'axios'
-import VirtualizedSelect from '../../helpers/VirtualizedSelect'
+import 'froala-editor/css/froala_style.min.css'
+import 'froala-editor/css/froala_editor.pkgd.min.css'
+import FroalaEditorComponent from 'react-froala-wysiwyg'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
+import FroalaEditor from 'react-froala-wysiwyg'
 const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
   <CFormInput {...props} ref={inputRef} />
 ))
@@ -183,7 +186,7 @@ const SendEmail = () => {
     { field: 'email', headerName: 'Email', width: 300 },
   ]
   const getRecord = () => {
-    let items = [];
+    let items = []
     categories.forEach((item) => {
       // console.log(item)
       let record = {
@@ -191,7 +194,7 @@ const SendEmail = () => {
         email: item.email,
         category: item.category_id,
       }
-     items.push(record)
+      items.push(record)
     })
 
     return items
@@ -199,6 +202,9 @@ const SendEmail = () => {
   const paginationModel = { page: 0, pageSize: 5 }
   const handleSelectionChange = (selection) => {
     setSelectedOptions(selection)
+  }
+  const handleModelChange = (e) => {
+    setSate({ ...state, message: e })
   }
   const createForm = () => {
     return (
@@ -260,13 +266,22 @@ const SendEmail = () => {
 
             <div className="m-3">
               <CFormLabel htmlFor="exampleFormControlInput1">Address</CFormLabel>
-              <CFormTextarea
+              {/* <CFormTextarea
                 type="text"
                 id="exampleFormControlInput1"
                 name="message"
                 value={state.message}
                 onChange={(e) => setSate({ ...state, message: e.target.value })}
                 placeholder="Add Email Message"
+              /> */}
+              <FroalaEditor
+                tag="textarea"
+                config={{
+                  placeholderText: 'Add Email Message!',
+                  charCounterCount: false,
+                }}
+                model={state.message}
+                onModelChange={handleModelChange}
               />
               {/* <p style={{ color: 'red' }}>{!state.address ? error : ''}</p> */}
             </div>
