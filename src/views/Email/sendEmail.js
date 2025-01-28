@@ -136,7 +136,7 @@ const SendEmail = () => {
     // obj.emails = selectedOptions
 
     axios
-      .post('https://cms.iadsr.edu.pk/api/send/email', obj)
+      .post('https://cms.fissionmonster.com/api/send', obj)
       .then(function (response) {
         if (response.data.status === true) {
           setSate({
