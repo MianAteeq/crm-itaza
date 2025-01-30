@@ -20,6 +20,7 @@ import {
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 import { getCats, getRoleStatusDownload } from './helpers/helper'
 let records = JSON.parse(localStorage.getItem('cats'))
+let role = localStorage.getItem('role')
 
 let route = [
   {
@@ -71,14 +72,15 @@ records
 
     route_email.push(obj)
   })
+
 let obj = {
   component: CNavItem,
   name: 'Send Email',
   to: '/send/email',
 }
-route_email.push(obj)
+if (role !== 'UPLOADER') route_email.push(obj)
 
-const _nav = getRoleStatusDownload('ADMIN')
+const _nav = getRoleStatusDownload(role)
   ? [
       {
         component: CNavItem,
