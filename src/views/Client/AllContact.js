@@ -20,7 +20,7 @@ import * as XLSX from 'xlsx'
 // import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import { addContact } from '../../helpers/GoogleAuth'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs } from '../../helpers/helper'
+import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
 const client = generateClient()
 const AllContact = () => {
   const [categories, setCategory] = useState([])
@@ -127,6 +127,7 @@ const AllContact = () => {
       }
 
       const { data: deletedTodo, error } = await client.models.Client.delete(toBeDeletedTodo)
+      showSuccessMessage('Contact Delete Successfully!')
       // fetchTodos()
     }
   }
