@@ -17,6 +17,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import DataTable from 'react-data-table-component'
 import { NavLink } from 'react-router-dom'
+import { showSuccessMessage } from '../../helpers/helper'
 const client = generateClient()
 const LogList = () => {
   const [categories, setCategory] = useState([])
@@ -28,6 +29,7 @@ const LogList = () => {
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.Log.list()
     setCategory(items)
+
   }
 
   useEffect(() => {
@@ -107,7 +109,7 @@ const LogList = () => {
       name: 'Action',
       selector: (row) => {
         return (
-           <NavLink to={{ pathname: '/view/log' }} state={JSON.stringify(row)}>
+          <NavLink to={{ pathname: '/view/log' }} state={JSON.stringify(row)}>
             View
           </NavLink>
         )
@@ -115,19 +117,24 @@ const LogList = () => {
     },
   ]
 
+  const getSort = () => {
+    console.log(categories)
+    if (categories.length > 0) {
+      return categories.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    }
+    return []
+  }
 
   return (
     <CRow>
       <CCol xs={12}>
-
         <CCard className="mb-4">
           <CCardHeader>
             <strong>Logs</strong>{' '}
-
           </CCardHeader>
           <CCardBody>
             <div className="overflow-x-auto">
-              <DataTable columns={columns} data={categories} pagination />
+              <DataTable columns={columns} data={getSort()} pagination />
               {/* <Table hoverable>
                 <Table.Head>
                   <Table.HeadCell>ID</Table.HeadCell>
