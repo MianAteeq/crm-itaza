@@ -19,7 +19,7 @@ import DataTable from 'react-data-table-component'
 import * as XLSX from 'xlsx'
 
 import { NavLink } from 'react-router-dom'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs } from '../../helpers/helper'
+import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
 const client = generateClient()
 const AllEmail = () => {
   const [categories, setCategory] = useState([])
@@ -124,7 +124,7 @@ const AllEmail = () => {
       }
 
       const { data: deletedTodo, error } = await client.models.EmailList.delete(toBeDeletedTodo)
-      // fetchTodos()
+      showSuccessMessage('Email Delete Successfully!')
     }
   }
 
