@@ -174,11 +174,7 @@ const SendEmail = () => {
     // obj.emails = selectedOptions
     updateState()
     try {
-      const response = await axios.post('https://cms.fissionmonster.com/api/send', obj)
-      console.log(response.data)
-
-      //Send temp and humidity to backend for analysis
-      const dataToSend = response.data
+      
       const sentWeatherData = await axios
         .post('https://cms.fissionmonster.com/api/send', obj)
         .then(async (response) => {
