@@ -21,7 +21,7 @@ import { IMaskMixin } from 'react-imask'
 import { useNavigate } from 'react-router-dom'
 import { addContact, checkUserLogin, CLIENT_ID, initGoogleAPI, signInGoogle } from '../../helpers/GoogleAuth'
 import { loadAuth2, loadGapiInsideDOM } from 'gapi-script'
-import { savedLogs } from '../../helpers/helper'
+import { savedLogs, showSuccessMessage } from '../../helpers/helper'
 const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
   <CFormInput {...props} ref={inputRef} />
 ))
@@ -190,6 +190,7 @@ const AddClient = () => {
         designation: '',
         working_at: '',
       })
+      showSuccessMessage('Contact Saved Successfully!')
       navigate('/all/client')
 
 
