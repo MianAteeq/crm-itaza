@@ -82,7 +82,21 @@ const ViewLog = (contact) => {
             <strong>Log Type</strong>
             <span style={{ float: 'right' }}>{state.logType}</span>
           </CListGroupItem>
+        </CListGroup>
+        <CListGroup>
+          {Object.keys(state.data).map((item, key) => {
+            // eslint-disable-next-line react/jsx-key
 
+            if (item.toUpperCase() !== 'CREATEDAT' && item.toUpperCase() !== 'UPDATEDAT') {
+              return (
+                <CListGroupItem>
+                  {' '}
+                  <strong>{item.toUpperCase()}</strong>
+                  <span style={{ float: 'right' }}>{state.data[item]}</span>
+                </CListGroupItem>
+              )
+            }
+          })}
         </CListGroup>
       </CCard>
     )
