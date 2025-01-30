@@ -19,7 +19,7 @@ import DataTable from 'react-data-table-component'
 import * as XLSX from 'xlsx'
 
 import { NavLink, useLocation } from 'react-router-dom'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs } from '../../helpers/helper'
+import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
 const client = generateClient()
 const DoctorDBSEmail = () => {
   const [categories, setCategory] = useState([])
@@ -41,7 +41,7 @@ const DoctorDBSEmail = () => {
   const role = localStorage.getItem('role')
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.EmailList.list({
-      limit: 20000,
+      limit: 200000,
       filter: {
         category_id: {
           beginsWith: name,
@@ -71,7 +71,7 @@ const DoctorDBSEmail = () => {
       .replace('-', ' ')
     if (capitalizeFirstLetter(pathName) === 'Doctor bds') {
       setName('Doctor BDS')
-    } else if (capitalizeFirstLetter(pathName) === 'Doctor mbs') {
+    } else if (capitalizeFirstLetter(pathName) === 'Doctor mbbs') {
       setName('Doctor MBBS')
     } else {
       setName(capitalizeFirstLetter(pathName))
@@ -164,7 +164,7 @@ const DoctorDBSEmail = () => {
       }
 
       const { data: deletedTodo, error } = await client.models.EmailList.delete(toBeDeletedTodo)
-      // fetchTodos()
+      showSuccessMessage('Email Delete Successfully!')
     }
   }
 
