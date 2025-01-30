@@ -17,7 +17,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { IMaskMixin } from 'react-imask'
 import { useNavigate } from 'react-router-dom'
-import { savedLogs } from '../../helpers/helper'
+import { savedLogs, showSuccessMessage } from '../../helpers/helper'
 const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
   <CFormInput {...props} ref={inputRef} />
 ))
@@ -115,6 +115,7 @@ const AddEmail = () => {
         working_at: '',
         designation: '',
       })
+      showSuccessMessage('Email Add Successfully!')
       navigate('/all/email')
     }
   }
