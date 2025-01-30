@@ -23,23 +23,29 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { IMaskMixin } from 'react-imask'
 import { useNavigate } from 'react-router-dom'
-import { savedLogs } from '../../helpers/helper'
+import { savedLogs, showErrorMessage, showSuccessMessage } from '../../helpers/helper'
 import Select from 'react-select'
 import axios from 'axios'
-import 'froala-editor/css/froala_style.min.css'
-import 'froala-editor/css/froala_editor.pkgd.min.css'
-import FroalaEditorComponent from 'react-froala-wysiwyg'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid'
-import FroalaEditor from 'react-froala-wysiwyg'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+
 const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
   <CFormInput {...props} ref={inputRef} />
 ))
 const client = generateClient()
 const SendEmail = () => {
   const [categories, setCategory] = useState([])
+  const [companyList, setCompanyList] = useState([
+    { label: 'IADSR', value: 'IADSR' },
+    { label: 'Dental Services', value: 'Dental Services' },
+    { label: 'Fission Monster', value: 'Fission Monster' },
+  ])
+  const [emailList, setEmailList] = useState([])
   const [state, setSate] = useState({
     emails: [],
-    subject: '',
+    company: '',
+    batch: '',
+    subject: 'hi',
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -79,8 +85,31 @@ const SendEmail = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
-    // fetchTodos()
-  }, [])
+    let EmailArray = []
+    let records = JSON.parse(localStorage.getItem('cats')).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )
+    console.log(records)
+
+    records.forEach((item, j) => {
+      const chunkSize = 1000
+      let catValue = categories.filter((rec) => rec.category_id === item.name)
+      let no = 0
+      for (let i = 0; i < catValue.length; i += chunkSize) {
+        no++
+        console.log(catValue.length, item.name)
+        const chunk = catValue.slice(i, i + chunkSize)
+        let obj = {
+          value: `${item.name} Batch ${no}`,
+          label: `${item.name} Batch ${no}`,
+          emails: chunk,
+        }
+        EmailArray.push(obj)
+      }
+    })
+    setEmailList(EmailArray)
+    console.log(EmailArray, 'EmailArray')
+  }, [categories])
 
   const removeItem = () => {
     const uniqueArray = selectedOptions.filter((value, index) => {
@@ -106,8 +135,17 @@ const SendEmail = () => {
     return re.test(email)
   }
 
+  const updateState = () => {
+    setSate({
+      emails: [],
+      company: '',
+      batch: '',
+      subject: '',
+      message: '',
+    })
+  }
+
   const saveDate = async () => {
-    console.log(state.emails)
     if (selectedOptions.length === 0) {
       setError('This field is required.')
       return
@@ -134,51 +172,51 @@ const SendEmail = () => {
       emails: JSON.stringify(selectedOptions),
     }
     // obj.emails = selectedOptions
+    updateState()
+    try {
+      const response = await axios.post('https://cms.fissionmonster.com/api/send', obj)
+      console.log(response.data)
 
-    axios
-      .post('https://cms.fissionmonster.com/api/send', obj)
-      .then(function (response) {
-        if (response.data.status === true) {
-          setSate({
-            emails: [],
-            subject: '',
-            message: '',
-          })
-          setSelectedOptions([])
-          setLoading(false)
-          Alert('Message Send Successfully')
-        }
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
-  }
-  const handleChange = (e) => {
-    let email = e.clipboardData.getData('Text')
+      //Send temp and humidity to backend for analysis
+      const dataToSend = response.data
+      const sentWeatherData = await axios
+        .post('https://cms.fissionmonster.com/api/send', obj)
+        .then(async (response) => {
+          if (response.data.status === true) {
+            setSelectedOptions([])
+            setLoading(false)
+            showSuccessMessage('Email Send Successfully!')
+          }
+          let object = {
+            message: `Send Email to ${obj.batch}`,
+          }
 
-    setSate({
-      ...state,
-      email: email,
-    })
-  }
-  const handleChangeCnic = (e) => {
-    let cnic = e.clipboardData.getData('Text').replace('-', '')
+          await savedLogs('SEND EMAIL', object)
 
-    setSate({
-      ...state,
-      cnic: cnic,
-    })
-  }
-  const onMenuOpen = () => setIsMenuOpen(true)
-  const onMenuClose = () => setIsMenuOpen(false)
-  const onChange = (selectedOptions) => {
-    if (selectedOptions.length > 0 || selectedOptions.length === 0) {
-      setSelectedOptions(selectedOptions)
-      return
-    } else {
-      setSelectedOptions((oldArray) => [...oldArray, selectedOptions])
+          updateState()
+        })
+    } catch {
+      console.log('error')
+      setLoading(false)
+      showErrorMessage('Email Not Send!')
     }
-    console.log(selectedOptions)
+  }
+  const onChangeCompany = (e) => {
+    // let email = e.clipboardData.getData('Text')
+
+    setSate({
+      ...state,
+      company: e.value,
+    })
+  }
+
+  const onChange = (selectedOptions) => {
+    setSelectedOptions(selectedOptions.emails)
+    console.log(selectedOptions.value)
+    setSate({
+      ...state,
+      batch: selectedOptions.label,
+    })
   }
   const columns = [
     // { field: 'id', headerName: 'ID' },
@@ -206,56 +244,38 @@ const SendEmail = () => {
   const handleModelChange = (e) => {
     setSate({ ...state, message: e })
   }
+  console.log(state)
   const createForm = () => {
     return (
       <>
-        <CModal
-          size="xl"
-          visible={visibleXL}
-          onClose={() => setVisibleXL(false)}
-          aria-labelledby="OptionalSizesExample1"
-        >
-          <CModalHeader>
-            <CModalTitle id="OptionalSizesExample1">Select Email</CModalTitle>
-          </CModalHeader>
-          <CModalBody>
-            <DataGrid
-              rows={getRecord()}
-              slots={{ toolbar: GridToolbar }}
-              columns={columns}
-              initialState={{ pagination: { paginationModel } }}
-              pageSizeOptions={[5, 10]}
-              checkboxSelection
-              onRowSelectionModelChange={handleSelectionChange}
-              sx={{ border: 0 }}
-            />
-          </CModalBody>
-          <CModalFooter>
-            <CButton color="primary" onClick={() => setVisibleXL(!visibleXL)}>
-              Confirm Email
-            </CButton>
-          </CModalFooter>
-        </CModal>
         <CCard className="mb-4" style={{ width: '60%', margin: '0 auto' }}>
           <CCardHeader>
-            <strong>{id ? 'Update' : 'Add'} Email</strong>
+            <strong>Send Email</strong>
           </CCardHeader>
           <CForm>
             <div className="m-3">
-              <CFormLabel htmlFor="exampleFormControlInput1" style={{ width: '100%' }}>
-                Select Email
+              <CFormLabel htmlFor="exampleFormControlInputCompany" style={{ width: '100%' }}>
+                Select Company
               </CFormLabel>
-
-              <CButton color="primary" onClick={() => setVisibleXL(!visibleXL)}>
-                Select Emails
-              </CButton>
-              <p style={{ color: 'red' }}>{!state.categoryId ? error : ''}</p>
+              <Select
+                onChange={onChangeCompany}
+                value={{ label: state.company }}
+                options={companyList}
+              />
+              <p style={{ color: 'red' }}>{!state.company ? error : ''}</p>
             </div>
             <div className="m-3">
-              <CFormLabel htmlFor="exampleFormControlInput1">Name</CFormLabel>
+              <CFormLabel htmlFor="exampleFormControlInputBatch" style={{ width: '100%' }}>
+                Select Email Batch
+              </CFormLabel>
+              <Select onChange={onChange} value={{ label: state.batch }} options={emailList} />
+              <p style={{ color: 'red' }}>{!state.batch ? error : ''}</p>
+            </div>
+            <div className="m-3">
+              <CFormLabel htmlFor="exampleFormControlInputsubject">Subject</CFormLabel>
               <CFormInput
                 type="text"
-                id="exampleFormControlInput1"
+                id="exampleFormControlInputsubject"
                 name="subject"
                 value={state.subject}
                 onChange={(e) => setSate({ ...state, subject: e.target.value })}
@@ -265,25 +285,8 @@ const SendEmail = () => {
             </div>
 
             <div className="m-3">
-              <CFormLabel htmlFor="exampleFormControlInput1">Address</CFormLabel>
-              {/* <CFormTextarea
-                type="text"
-                id="exampleFormControlInput1"
-                name="message"
-                value={state.message}
-                onChange={(e) => setSate({ ...state, message: e.target.value })}
-                placeholder="Add Email Message"
-              /> */}
-              <FroalaEditor
-                tag="textarea"
-                config={{
-                  placeholderText: 'Add Email Message!',
-                  charCounterCount: false,
-                }}
-                model={state.message}
-                onModelChange={handleModelChange}
-              />
-              {/* <p style={{ color: 'red' }}>{!state.address ? error : ''}</p> */}
+              <CFormLabel htmlFor="exampleFormControlInput1">Message</CFormLabel>
+              <ReactQuill theme="snow" value={state.message} onChange={handleModelChange} />
             </div>
             <div className="m-3">
               <div className="d-grid gap-2 col-6 mx-auto">
