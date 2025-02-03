@@ -47,6 +47,12 @@ records
 
     route.push(obj)
   })
+let obj_email = {
+  component: CNavItem,
+  name: 'Send Message',
+  to: '/send/message',
+}
+route.push(obj_email)
 
 let route_email = [
   {
@@ -78,7 +84,7 @@ let obj = {
   name: 'Send Email',
   to: '/send/email',
 }
-if (role !== 'UPLOADER') route_email.push(obj)
+route_email.push(obj)
 
 const _nav = getRoleStatusDownload(role)
   ? [
