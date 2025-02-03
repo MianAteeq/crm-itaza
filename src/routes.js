@@ -21,6 +21,7 @@ import ViewEmail from './views/Client/ViewEmail'
 import LogList from './views/logs/logList'
 import ViewLog from './views/logs/ViewLog'
 import SendEmail from './views/Email/sendEmail'
+import Chat from './views/Client/Chat'
 
 // import CategoryList from './views/categories/categoryList'
 
@@ -115,6 +116,7 @@ const routes = [
   { path: '/view/client', name: 'View Contact', element: ViewClient, exact: true },
   { path: '/view/email', name: 'View Email', element: ViewEmail, exact: true },
   { path: '/all/client', name: 'All Client', element: AllContact, exact: true },
+  { path: '/send/message', name: 'Send Message', element: Chat, exact: true },
   // { path: '/doctor/dbs/client', name: 'Doctor Dbs Client', element: DoctorDBS, exact: true },
   // { path: '/doctor/mbs/client', name: 'Doctor MBS Client', element: DoctorMbs, exact: true },
   // { path: '/patient/client', name: 'Patient ', element: Patient, exact: true },
