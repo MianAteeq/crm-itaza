@@ -96,7 +96,7 @@ const AppHeaderDropdown = () => {
         {wa_status === true ? (
           <CDropdownItem onClick={() => whatsAppLogout()} style={{ cursor: 'pointer' }}>
             <CIcon icon={cilLockLocked} className="me-2" />
-            WhatsApp Logout
+          WhatsApp Logout
           </CDropdownItem>
         ) : null}
       </CDropdownMenu>
