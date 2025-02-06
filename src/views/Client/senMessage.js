@@ -45,7 +45,7 @@ const SendMessage = () => {
     emails: [],
     company: '',
     batch: '',
-    subject: 'hi',
+    subject: '',
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -174,7 +174,7 @@ const SendMessage = () => {
             message: `WhatsApp Message Send to ${obj.batch}`,
           }
 
-          await savedLogs('WhatsApp Message EMAIL', object)
+          await savedLogs('WhatsApp Message ', object)
 
           updateState()
           setFile(null)
