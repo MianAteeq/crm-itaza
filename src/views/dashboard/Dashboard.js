@@ -47,6 +47,7 @@ import {
   cilArrowRight,
   cilContact,
   cibGmail,
+  cibMessenger,
 } from '@coreui/icons'
 
 import avatar1 from 'src/assets/images/avatars/1.jpg'
@@ -61,11 +62,34 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 import { generateClient } from 'aws-amplify/data'
 import GoogleLogin from 'react-google-login'
+import axios from 'axios'
 
 const client = generateClient()
 const Dashboard = () => {
   const [categories, setCategory] = useState([])
   const [emails, setEmail] = useState([])
+  const [state, setState] = useState({
+    iadsr_monthly_email: 0,
+    iadsr_weekly_email: 0,
+    iadsr_daily_email: 0,
+    iadsr_monthly_sms: 0,
+    iadsr_weekly_sms: 0,
+    iadsr_daily_sms: 0,
+
+    fm_monthly_email: 0,
+    fm_weekly_email: 0,
+    fm_daily_email: 0,
+    fm_monthly_sms: 0,
+    fm_weekly_sms: 0,
+    fm_daily_sms: 0,
+
+    dental_services_monthly_email: 0,
+    dental_services_weekly_email: 0,
+    dental_services_daily_email: 0,
+    dental_services_monthly_sms: 0,
+    dental_services_weekly_sms: 0,
+    dental_services_daily_sms: 0,
+  })
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.Client.list(
       {
@@ -91,12 +115,208 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchTodos()
-    // fetchEmail()
+    getRecord()
   }, [])
 
+  const getRecord = async () => {
+    const sentWeatherData = await axios
+      .get('https://cms.fissionmonster.com/api/get/stats')
+      .then(async (response) => {
+        const data = response.data
+        setState(data)
+      })
+  }
 
   return (
     <>
+      <CRow>
+        <CCol xs={12}>
+          <h2>Iadsr Stats</h2>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={30} />}
+            title="Total Email Send (Monthly)"
+            value={state?.iadsr_monthly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Weekly)"
+            value={state?.iadsr_weekly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Today)"
+            value={state?.iadsr_daily_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={30} />}
+            title="Total Message Send (Monthly)"
+            value={state?.iadsr_monthly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Weekly)"
+            value={state?.iadsr_weekly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Today)"
+            value={state?.iadsr_daily_sms}
+          />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={12}>
+          <h2>FM Stats</h2>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={30} />}
+            title="Total Email Send (Monthly)"
+            value={state?.fm_monthly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Weekly)"
+            value={state?.fm_weekly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Today)"
+            value={state?.fm_daily_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={30} />}
+            title="Total Message Send (Monthly)"
+            value={state?.fm_monthly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Weekly)"
+            value={state?.fm_weekly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Today)"
+            value={state?.fm_daily_sms}
+          />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={12}>
+          <h2>Dental Services Stats</h2>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={30} />}
+            title="Total Email Send (Monthly)"
+            value={state?.dental_services_monthly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Weekly)"
+            value={state?.dental_services_weekly_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibGmail} height={24} />}
+            title="Total Email Send (Today)"
+            value={state?.dental_services_daily_email}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={30} />}
+            title="Total Message Send (Monthly)"
+            value={state?.dental_services_monthly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Weekly)"
+            value={state?.dental_services_weekly_sms}
+          />
+        </CCol>
+        <CCol xs={4}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            icon={<CIcon icon={cibMessenger} height={24} />}
+            title="Total Message Send (Today)"
+            value={state?.dental_services_daily_sms}
+          />
+        </CCol>
+      </CRow>
+
+      <CCol xs={12}>
+        <h2>Records</h2>
+      </CCol>
+
       <CRow>
         <CCol xs={4}>
           <CWidgetStatsF
