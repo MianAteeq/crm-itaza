@@ -63,6 +63,7 @@
     "wait-on": "^8.0.2",
     "mdb-react-ui-kit": "^9.0.0",
     "xlsx": "^0.18.5"
+    
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.8.0",
