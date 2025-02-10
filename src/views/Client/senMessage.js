@@ -15,6 +15,7 @@ import {
   CModalTitle,
   CModalBody,
   CModalFooter,
+  CSpinner,
 } from '@coreui/react'
 import { DocsComponents, DocsExample } from 'src/components'
 import { Alert, Spinner, Table } from 'flowbite-react'
@@ -28,6 +29,23 @@ import Select from 'react-select'
 import axios from 'axios'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import {
+  MDBCol,
+  MDBContainer,
+  MDBRow,
+  MDBCard,
+  MDBCardText,
+  MDBCardBody,
+  MDBCardImage,
+  MDBBtn,
+  MDBBreadcrumb,
+  MDBBreadcrumbItem,
+  MDBProgress,
+  MDBProgressBar,
+  MDBIcon,
+  MDBListGroup,
+  MDBListGroupItem,
+} from 'mdb-react-ui-kit'
 
 const CFormInputWithMask = IMaskMixin(({ inputRef, ...props }) => (
   <CFormInput {...props} ref={inputRef} />
@@ -45,15 +63,22 @@ const SendMessage = () => {
     emails: [],
     company: '',
     batch: '',
-    subject: '',
+    subject: 'hi',
     message: '',
   })
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [id, setID] = useState('')
   const [error, setError] = useState('')
   const [selectedOptions, setSelectedOptions] = useState([])
   const [file, setFile] = useState(null)
   const fileInputRef = useRef(null)
+  const [waInstance, setWaInstance] = useState({
+    instanceId: '',
+    displayName: '',
+    contactId: '',
+    formattedNumber: '',
+  })
 
   // Function to handle file upload reset
   const handleReset = () => {
@@ -62,6 +87,7 @@ const SendMessage = () => {
       fileInputRef.current.value = ''
     }
   }
+
   useEffect(() => {
     const sub = client.models.Client.observeQuery({ limit: 50000 }).subscribe({
       next: ({ items }) => {
@@ -70,6 +96,7 @@ const SendMessage = () => {
       },
     })
 
+    getWaData()
     return () => sub.unsubscribe()
   }, [])
 
@@ -100,30 +127,6 @@ const SendMessage = () => {
     console.log(EmailArray, 'EmailArray')
   }, [categories])
 
-  const removeItem = () => {
-    const uniqueArray = selectedOptions.filter((value, index) => {
-      const _value = JSON.stringify(value)
-      return (
-        index ===
-        selectedOptions.findIndex((obj) => {
-          return JSON.stringify(obj) === _value
-        })
-      )
-    })
-
-    return uniqueArray
-  }
-
-  const editRecord = (record) => {
-    setVisible(true)
-    setID(record.toID)
-    setName(record.name)
-  }
-  const validateEmail = (email) => {
-    var re = /\S+@\S+\.\S+/
-    return re.test(email)
-  }
-
   const updateState = () => {
     setSate({
       emails: [],
@@ -131,6 +134,21 @@ const SendMessage = () => {
       batch: '',
       subject: '',
       message: '',
+    })
+  }
+
+  const getWaData = async () => {
+    await axios.get('https://cms.fissionmonster.com/api/get/wa/status').then(async (response) => {
+      if (response.data.status === true) {
+        let res = response.data.data
+        setWaInstance({
+          instanceId: res.instanceId,
+          displayName: res.data.displayName,
+          contactId: res.data.contactId,
+          formattedNumber: res.data.formattedNumber,
+        })
+        setPageLoading(false)
+      }
     })
   }
 
@@ -174,7 +192,7 @@ const SendMessage = () => {
             message: `WhatsApp Message Send to ${obj.batch}`,
           }
 
-          await savedLogs('WhatsApp Message ', object)
+          await savedLogs('WhatsApp Message EMAIL', object)
 
           updateState()
           setFile(null)
@@ -226,7 +244,7 @@ const SendMessage = () => {
   const createForm = () => {
     return (
       <>
-        <CCard className="mb-4" style={{ width: '60%', margin: '0 auto' }}>
+        <CCard className="mb-4" style={{ width: '100%', margin: '0 auto' }}>
           <CCardHeader>
             <strong>Send WhatsApp Message</strong>
           </CCardHeader>
@@ -287,9 +305,113 @@ const SendMessage = () => {
       </>
     )
   }
+  const whatsAppLogout = async () => {
+    setPageLoading(true)
+    // return
+    const response = await axios.get('https://cms.fissionmonster.com/api/wa/logout')
+
+    if (response.data.status === true) {
+      showSuccessMessage('WhatsApp Logout Successfully!')
+      localStorage.setItem('wa_status', false)
+      setPageLoading(false)
+    }
+  }
   return (
     <CRow>
-      <CCol xs={12}>{createForm()}</CCol>
+      {pageLoading === true ? (
+        <div className="pt-3 text-center">
+          <CSpinner color="primary" variant="grow" />
+        </div>
+      ) : (
+        <CCol xs={12}>
+          {' '}
+          <section style={{ backgroundColor: '#eee' }}>
+            <MDBContainer className="py-5">
+              <MDBRow>
+                <MDBCol lg="4">
+                  <MDBCard className="mb-4">
+                    <MDBCardBody className="text-center">
+                      <MDBCardImage
+                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
+                        alt="avatar"
+                        className="rounded-circle"
+                        style={{ width: '150px', margin: '0 auto' }}
+                        fluid
+                      />
+                      <h5
+                        className="text-muted mb-1 my-3"
+                        style={{ color: 'black !important', fontSize: '1.3rem' }}
+                      >
+                        {waInstance?.displayName}
+                      </h5>
+                      <div className="d-flex justify-content-center mb-2">
+                        <CButton
+                          color="primary"
+                          style={{ backgroundColor: 'red', border: 'red' }}
+                          onClick={() => whatsAppLogout()}
+                        >
+                          Logout
+                        </CButton>
+                      </div>
+                    </MDBCardBody>
+                  </MDBCard>
+
+                  <MDBCard className="mb-4">
+                    <MDBCardBody>
+                      <MDBRow>
+                        <MDBCol sm="5">
+                          <MDBCardText>Display Name</MDBCardText>
+                        </MDBCol>
+                        <MDBCol sm="7">
+                          <MDBCardText className="text-muted">
+                            {waInstance?.displayName}
+                          </MDBCardText>
+                        </MDBCol>
+                      </MDBRow>
+                      <hr />
+                      <MDBRow>
+                        <MDBCol sm="5">
+                          <MDBCardText>Status</MDBCardText>
+                        </MDBCol>
+                        <MDBCol sm="7">
+                          <MDBCardText className="text-muted">
+                            <span className="success">Active</span>
+                          </MDBCardText>
+                        </MDBCol>
+                      </MDBRow>
+                      <hr />
+                      <MDBRow>
+                        <MDBCol sm="5">
+                          <MDBCardText>Phone</MDBCardText>
+                        </MDBCol>
+                        <MDBCol sm="7">
+                          <MDBCardText className="text-muted">
+                            {waInstance?.formattedNumber}
+                          </MDBCardText>
+                        </MDBCol>
+                      </MDBRow>
+                      <hr />
+                      <MDBRow>
+                        <MDBCol sm="5">
+                          <MDBCardText>instance ID</MDBCardText>
+                        </MDBCol>
+                        <MDBCol sm="7">
+                          <MDBCardText className="text-muted">{waInstance?.instanceId}</MDBCardText>
+                        </MDBCol>
+                      </MDBRow>
+                    </MDBCardBody>
+                  </MDBCard>
+                </MDBCol>
+                <MDBCol lg="8">
+                  <MDBRow>
+                    <MDBCol md="12">{createForm()}</MDBCol>
+                  </MDBRow>
+                </MDBCol>
+              </MDBRow>
+            </MDBContainer>
+          </section>
+        </CCol>
+      )}
     </CRow>
   )
 }
