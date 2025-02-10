@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import {
   CCard,
   CCardHeader,
@@ -45,7 +45,7 @@ const SendEmail = () => {
     emails: [],
     company: '',
     batch: '',
-    subject: 'hi',
+    subject: '',
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -54,6 +54,8 @@ const SendEmail = () => {
   const [error, setError] = useState('')
   const [selectedOptions, setSelectedOptions] = useState([])
   const [visibleXL, setVisibleXL] = useState(false)
+  const [file, setFile] = useState(null)
+  const fileInputRef = useRef(null)
   const navigate = useNavigate()
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.EmailList.list({
@@ -170,11 +172,11 @@ const SendEmail = () => {
     let obj = {
       ...state,
       emails: JSON.stringify(selectedOptions),
+      file: file,
     }
     // obj.emails = selectedOptions
     updateState()
     try {
-      
       const sentWeatherData = await axios
         .post('https://cms.fissionmonster.com/api/send', obj)
         .then(async (response) => {
@@ -182,14 +184,20 @@ const SendEmail = () => {
             setSelectedOptions([])
             setLoading(false)
             showSuccessMessage('Email Send Successfully!')
-          }
-          let object = {
-            message: `Send Email to ${obj.batch}`,
+            let object = {
+              message: `Send Email to ${obj.batch}`,
+            }
+
+            await savedLogs('SEND EMAIL', object)
+
+            updateState()
           }
 
-          await savedLogs('SEND EMAIL', object)
-
-          updateState()
+          if (response.data.status === false) {
+            // setSelectedOptions([])
+            setLoading(false)
+            showSuccessMessage(response.data.message)
+          }
         })
     } catch {
       console.log('error')
@@ -240,7 +248,22 @@ const SendEmail = () => {
   const handleModelChange = (e) => {
     setSate({ ...state, message: e })
   }
-  console.log(state)
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      // setFile(e.target.files[0])
+      convertToBase64(e.target.files[0])
+    }
+  }
+  const convertToBase64 = (selectedFile) => {
+    const reader = new FileReader()
+
+    reader.readAsDataURL(selectedFile)
+
+    reader.onload = () => {
+      console.log('called: ', reader.result)
+      setFile(reader.result)
+    }
+  }
   const createForm = () => {
     return (
       <>
@@ -278,6 +301,18 @@ const SendEmail = () => {
                 placeholder="Subject"
               />
               <p style={{ color: 'red' }}>{!state.subject ? error : ''}</p>
+            </div>
+            <div className="m-3">
+              <CFormLabel htmlFor="exampleFormControlInput1">Add File</CFormLabel>
+              <CFormInput
+                type="file"
+                id="exampleFormControlInput1"
+                name="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                placeholder="Add File"
+              />
+              {/* <p style={{ color: 'red' }}>{!state.address ? error : ''}</p> */}
             </div>
 
             <div className="m-3">
