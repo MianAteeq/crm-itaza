@@ -187,16 +187,22 @@ const SendMessage = () => {
             setSelectedOptions([])
             setLoading(false)
             showSuccessMessage('Message Send Successfully!')
-          }
-          let object = {
-            message: `WhatsApp Message Send to ${obj.batch}`,
+            let object = {
+              message: `WhatsApp Message Send to ${obj.batch}`,
+            }
+
+            await savedLogs('WhatsApp Message', object)
+
+            updateState()
+            setFile(null)
+            handleReset()
           }
 
-          await savedLogs('WhatsApp Message EMAIL', object)
-
-          updateState()
-          setFile(null)
-          handleReset()
+          if (response.data.status === false) {
+            // setSelectedOptions([])
+            setLoading(false)
+            showSuccessMessage(response.data.message)
+          }
         })
     } catch {
       console.log('error')
@@ -332,7 +338,7 @@ const SendMessage = () => {
                   <MDBCard className="mb-4">
                     <MDBCardBody className="text-center">
                       <MDBCardImage
-                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
+                        src="https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png"
                         alt="avatar"
                         className="rounded-circle"
                         style={{ width: '150px', margin: '0 auto' }}
