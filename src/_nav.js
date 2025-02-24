@@ -164,6 +164,12 @@ const _nav = getRoleStatusDownload(role)
         icon: <CIcon icon={cibGmail} customClassName="nav-icon" />,
         items: route_email,
       },
+    {
+        component: CNavItem,
+        name: 'Logs',
+        to: '/logs/list',
+        icon: <CIcon icon={cilLineWeight} customClassName="nav-icon" />,
+      },
     ]
 
 export default _nav
