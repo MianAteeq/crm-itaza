@@ -178,7 +178,7 @@ const SendEmail = () => {
     updateState()
     try {
       const sentWeatherData = await axios
-        .post('https://cms.fissionmonster.com/api/send', obj)
+        .post('https://iadsr.fissionmonster.com/api/send', obj)
         .then(async (response) => {
           if (response.data.status === true) {
             setSelectedOptions([])
