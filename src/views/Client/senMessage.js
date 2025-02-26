@@ -105,7 +105,7 @@ const SendMessage = () => {
     let records = JSON.parse(localStorage.getItem('cats')).sort((a, b) =>
       a.name.localeCompare(b.name),
     )
-    console.log(records)
+    // console.log(records)
 
     records.forEach((item, j) => {
       const chunkSize = 50
