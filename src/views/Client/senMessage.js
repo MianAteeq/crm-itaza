@@ -138,7 +138,7 @@ const SendMessage = () => {
   }
 
   const getWaData = async () => {
-    await axios.get('https://cms.fissionmonster.com/api/get/wa/status').then(async (response) => {
+    await axios.get('https://iadsr.fissionmonster.com/api/get/wa/status').then(async (response) => {
       if (response.data.status === true) {
         let res = response.data.data
         setWaInstance({
@@ -181,7 +181,7 @@ const SendMessage = () => {
     updateState()
     try {
       await axios
-        .post('https://cms.fissionmonster.com/api/send/message', obj)
+        .post('https:/iadsr.fissionmonster.com/api/send/message', obj)
         .then(async (response) => {
           if (response.data.status === true) {
             setSelectedOptions([])
@@ -314,7 +314,7 @@ const SendMessage = () => {
   const whatsAppLogout = async () => {
     setPageLoading(true)
     // return
-    const response = await axios.get('https://cms.fissionmonster.com/api/wa/logout')
+    const response = await axios.get('https://iadsr.fissionmonster.com/api/wa/logout')
 
     if (response.data.status === true) {
       showSuccessMessage('WhatsApp Logout Successfully!')
