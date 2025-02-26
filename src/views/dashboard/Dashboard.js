@@ -120,7 +120,7 @@ const Dashboard = () => {
 
   const getRecord = async () => {
     const sentWeatherData = await axios
-      .get('https://cms.fissionmonster.com/api/get/stats')
+      .get('https://iadsr.fissionmonster.com/api/get/stats')
       .then(async (response) => {
         const data = response.data
         setState(data)
