@@ -35,7 +35,7 @@ const AppHeaderDropdown = () => {
     await signOut({ global: true })
   }
   const whatsAppLogout = async () => {
-    const response = await axios.get('https://cms.fissionmonster.com/api/wa/logout')
+    const response = await axios.get('https://iadsr.fissionmonster.com/api/wa/logout')
 
     if (response.data.status === true) {
       localStorage.setItem('wa_status', false)
