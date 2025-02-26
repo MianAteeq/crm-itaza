@@ -15,7 +15,7 @@ const Chat = () => {
     }
   }, [])
   const callApi = async () => {
-    const response = await axios.get('https://cms.fissionmonster.com/api/get/instance')
+    const response = await axios.get('https://iadsr.fissionmonster.com/api/get/instance')
     console.log(response.data.status)
 
     if (response.data.status === true) {
