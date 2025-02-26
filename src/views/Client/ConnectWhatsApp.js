@@ -14,7 +14,7 @@ const ConnectWhatsApp = () => {
     }
   }, [])
   const callApi = async () => {
-    const response = await axios.get('https://cms.fissionmonster.com/api/get/qr/code')
+    const response = await axios.get('https://iadsr.fissionmonster.com/api/get/qr/code')
     console.log(response.data.status)
 
     if (response.data.status === true) {
