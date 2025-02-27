@@ -181,7 +181,7 @@ const SendMessage = () => {
     updateState()
     try {
       await axios
-        .post('https:/iadsr.fissionmonster.com/api/send/message', obj)
+        .post('https://iadsr.fissionmonster.com/api/send/message', obj)
         .then(async (response) => {
           if (response.data.status === true) {
             setSelectedOptions([])
