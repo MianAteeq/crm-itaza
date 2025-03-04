@@ -27,7 +27,9 @@ const LogList = () => {
   const [visible, setVisible] = useState(false)
 
   const fetchTodos = async () => {
-    const { data: items, errors } = await client.models.Log.list()
+    const { data: items, errors } = await client.models.Log.list({
+      limit: 50000,
+    })
     setCategory(items)
 
   }
