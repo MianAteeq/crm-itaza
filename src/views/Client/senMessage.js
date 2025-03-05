@@ -108,7 +108,7 @@ const SendMessage = () => {
     // console.log(records)
 
     records.forEach((item, j) => {
-      const chunkSize = 50
+      const chunkSize = 150
       let catValue = categories.filter((rec) => rec.category_id === item.name)
       let no = 0
       for (let i = 0; i < catValue.length; i += chunkSize) {
