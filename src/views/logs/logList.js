@@ -17,7 +17,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import DataTable from 'react-data-table-component'
 import { NavLink } from 'react-router-dom'
-import { showSuccessMessage } from '../../helpers/helper'
+import { showErrorMessage, showSuccessMessage } from '../../helpers/helper'
 const client = generateClient()
 const LogList = () => {
   const [categories, setCategory] = useState([])
@@ -25,13 +25,14 @@ const LogList = () => {
   const [id, setID] = useState('')
   const [error, setError] = useState('')
   const [visible, setVisible] = useState(false)
+  const [filterText, setFilterText] = React.useState('')
+  const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false)
 
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.Log.list({
       limit: 50000,
     })
     setCategory(items)
-
   }
 
   useEffect(() => {
@@ -86,6 +87,15 @@ const LogList = () => {
       }
     }
   }
+
+  const showErrorMessage = (dataObject, type) => {
+    if (dataObject.message !== undefined) {
+      return dataObject.message.replace('WhatsApp Message Send to', '').replace('Send Email to', '')
+    } else {
+      return type
+    }
+  }
+
   const columns = [
     {
       name: 'ID',
@@ -108,8 +118,16 @@ const LogList = () => {
       selector: (row) => row.logType,
     },
     {
+      name: 'Send To',
+      selector: (row) => {
+        console.log(JSON.parse(row.logObject))
+        return showErrorMessage(JSON.parse(row.logObject), row.logType)
+      },
+    },
+    {
       name: 'Action',
       selector: (row) => {
+        console.log(JSON.parse(row.logObject))
         return (
           <NavLink to={{ pathname: '/view/log' }} state={JSON.stringify(row)}>
             View
@@ -126,7 +144,27 @@ const LogList = () => {
     }
     return []
   }
+  const subHeaderComponentMemo = React.useMemo(() => {
+    const handleClear = () => {
+      if (filterText) {
+        setResetPaginationToggle(!resetPaginationToggle)
+        setFilterText('')
+      }
+    }
+    return (
+      <CFormInput
+        type="text"
+        id="exampleFormControlInput1"
+        style={{ width: '25%' }}
+        onChange={(e) => setFilterText(e.target.value)}
+        value={filterText}
+      />
+    )
+  }, [filterText, resetPaginationToggle])
 
+  const filteredItems = getSort().filter(
+    (item) => item.logType && item.logType.toLowerCase().includes(filterText.toLowerCase()),
+  )
   return (
     <CRow>
       <CCol xs={12}>
@@ -136,7 +174,15 @@ const LogList = () => {
           </CCardHeader>
           <CCardBody>
             <div className="overflow-x-auto">
-              <DataTable columns={columns} data={getSort()} pagination />
+              <DataTable
+                columns={columns}
+                data={filterText === '' ? getSort() : filteredItems}
+                pagination
+                paginationResetDefaultPage={resetPaginationToggle} // optionally, a hook to reset pagination to page 1
+                subHeader
+                subHeaderComponent={subHeaderComponentMemo}
+                persistTableHead
+              />
               {/* <Table hoverable>
                 <Table.Head>
                   <Table.HeadCell>ID</Table.HeadCell>
