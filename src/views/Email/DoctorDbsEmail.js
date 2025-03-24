@@ -282,9 +282,32 @@ const DoctorDBSEmail = () => {
             saved++
             setSavedReocrd(saved)
           } else {
-            failed++
+            if (errors.length > 0) {
+              if (errors[0].errorType === 'DynamoDB:ConditionalCheckFailedException') {
+                const toBeDeletedTodo = {
+                  email: email,
+                }
 
-            setFailedRecord(failed)
+                await client.models.EmailList.delete(toBeDeletedTodo)
+
+                await client.models.EmailList.create({
+                  category_id: name,
+                  email: email,
+                  name: item.name ? item.name.concat(' ', item.father_name) : 'No Name',
+                  designation: item.designation ? item.designation : '',
+                  cnic: item.cnic ? item.cnic : '',
+                  hospital: item.hospital ? item.hospital : '',
+                  working_at: item.working_at ? item.working_at : '',
+                  address: item.address ? item.address : '',
+                })
+                saved++
+                setSavedReocrd(saved)
+              }
+            } else {
+              failed++
+
+              setFailedRecord(failed)
+            }
           }
         }
       } else {
