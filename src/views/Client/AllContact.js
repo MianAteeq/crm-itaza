@@ -20,7 +20,13 @@ import * as XLSX from 'xlsx'
 // import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import { addContact } from '../../helpers/GoogleAuth'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
+import {
+  getRoleStatusDownload,
+  getRoleStatusView,
+  savedLogs,
+  showSuccessMessage,
+} from '../../helpers/helper'
+import { getCurrentUser } from 'aws-amplify/auth'
 const client = generateClient()
 const AllContact = () => {
   const [categories, setCategory] = useState([])
@@ -39,6 +45,7 @@ const AllContact = () => {
   const [failedRecord, setFailedRecord] = useState(0)
   const [name, setName] = useState('')
   const role = localStorage.getItem('role')
+  const [g_login, setGLogin] = useState(false)
 
   console.log(role)
 
@@ -53,7 +60,19 @@ const AllContact = () => {
 
   useEffect(() => {
     fetchTodos()
+    checkUserLoginGoogle()
   }, [])
+
+  const checkUserLoginGoogle = async () => {
+    let user = await getCurrentUser()
+    console.log(user.wt)
+
+    if (user.wt === undefined) {
+      setGLogin(false)
+    } else {
+      setGLogin(true)
+    }
+  }
   useEffect(() => {
     const sub = client.models.Client.observeQuery({ limit: 20000 }).subscribe({
       next: ({ items }) => {
@@ -98,7 +117,7 @@ const AllContact = () => {
       const sheet = workbook.Sheets[sheetName]
       const sheetData = XLSX.utils.sheet_to_json(sheet)
       setTotalRecord(sheetData.length)
-      let exists = Object.keys(sheetData[0]).filter((record) => record === 'phone_number')
+      let exists = Object.keys(sheetData[0]).filter((record) => record === 'contact')
       console.log(exists, 'exists')
       if (exists.length === 0) {
         setError('Invalid File Format')
@@ -231,59 +250,81 @@ const AllContact = () => {
     var failed = 0
     var saved = 0
     records.forEach(async (item) => {
-      if (item.phone_number !== undefined) {
-        let phone_number = getNumber(
-          item?.phone_number?.toString().replace(' ', '').replace('-', ''),
-        )
+      if (item.contact !== undefined) {
+        let phone_number = getNumber(item?.contact?.toString().replace(' ', '').replace('-', ''))
         if (phone_number.length < 13) {
           failed++
           return
         }
         const { errors, data: newTodo } = await client.models.Client.create({
           category_id: item['category'] ?? 'Generic',
-          name: item.name ? item.name : 'No Name',
+          name: item.name ? item.name.concat(' ', item.father_name) : 'No Name',
           designation: item.designation ? item.designation : '',
           cnic: item.cnic ? item.cnic : '',
           hospital: item.hospital ? item.hospital : '',
           address: item.address ? item.address : '',
           phone_number: phone_number,
         })
-        const newContact = {
-          names: [
-            {
-              givenName: item.name,
-              familyName: '',
-            },
-          ],
-          emailAddresses: [
-            {
-              value: item.email,
-            },
-          ],
-          phoneNumbers: [
-            {
-              value: phone_number,
-            },
-          ],
-          addresses: [
-            {
-              streetAddress: item.address,
-              city: '',
-              region: '',
-              postalCode: '',
-              country: 'Pakistan',
-              type: '',
-            },
-          ],
+        if (g_login === true) {
+          const newContact = {
+            names: [
+              {
+                givenName: item.name,
+                familyName: '',
+              },
+            ],
+            emailAddresses: [
+              {
+                value: item.email,
+              },
+            ],
+            phoneNumbers: [
+              {
+                value: phone_number,
+              },
+            ],
+            addresses: [
+              {
+                streetAddress: item.address,
+                city: '',
+                region: '',
+                postalCode: '',
+                country: 'Pakistan',
+                type: '',
+              },
+            ],
+          }
+          await addContact(newContact)
         }
-        await addContact(newContact)
         if (newTodo !== null) {
           saved++
           setSavedReocrd(saved)
         } else {
-          failed++
+          if (errors.length > 0) {
+            if (errors[0].errorType === 'DynamoDB:ConditionalCheckFailedException') {
+              const toBeDeletedTodo = {
+                phone_number: phone_number,
+              }
 
-          setFailedRecord(failed)
+              await client.models.Client.delete(toBeDeletedTodo)
+
+              await client.models.Client.create({
+                category_id: item['category'] ?? 'Generic',
+                name: item.name ? item.name.concat(' ', item.father_name) : 'No Name',
+                designation: item.designation ? item.designation : '',
+                cnic: item.cnic ? item.cnic : '',
+                hospital: item.hospital ? item.hospital : '',
+                address: item.address ? item.address : '',
+                phone_number: phone_number,
+              })
+              saved++
+              setSavedReocrd(saved)
+            }
+          } else {
+            failed++
+            setFailedRecord(failed)
+          }
+
         }
       } else {
         failed++
