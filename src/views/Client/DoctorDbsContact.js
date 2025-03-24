@@ -19,7 +19,7 @@ import DataTable from 'react-data-table-component'
 import * as XLSX from 'xlsx'
 
 import { NavLink, useLocation, useParams } from 'react-router-dom'
-import { addContact } from '../../helpers/GoogleAuth'
+import { addContact, getCurrentUser } from '../../helpers/GoogleAuth'
 import {
   getRoleStatusDownload,
   getRoleStatusView,
@@ -46,6 +46,7 @@ const DoctorDBS = () => {
   const role = localStorage.getItem('role')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [g_login, setGLogin] = useState(false)
   const capitalizeFirstLetter = (val) => {
     return String(val).charAt(0).toUpperCase() + String(val).slice(1)
   }
@@ -87,8 +88,20 @@ const DoctorDBS = () => {
     if (name !== '') {
       setLoadingActive(true)
       fetchTodos()
+      checkUserLoginGoogle()
     }
   }, [name])
+
+  const checkUserLoginGoogle = async () => {
+    let user = await getCurrentUser()
+    console.log(user.wt)
+
+    if (user.wt === undefined) {
+      setGLogin(false)
+    } else {
+      setGLogin(true)
+    }
+  }
 
   useEffect(() => {
     const sub = client.models.Client.observeQuery({
@@ -142,7 +155,7 @@ const DoctorDBS = () => {
       const sheetData = XLSX.utils.sheet_to_json(sheet)
       setTotalRecord(sheetData.length)
       let exists = Object.keys(sheetData[0]).filter(
-        (record) => record.replace(' ', '') === 'phone_number',
+        (record) => record.replace(' ', '') === 'contact',
       )
       if (exists.length === 0) {
         setError('Invalid File Format')
@@ -284,11 +297,9 @@ const DoctorDBS = () => {
     var failed_digit = []
     var saved = 0
     records.forEach(async (item) => {
-      let no = item?.phone_number?.toString().replace(' ', '').replace('-', '')
+      let no = item?.contact?.toString().replace(' ', '').replace('-', '')
       if (no !== undefined && no !== '' && no !== null) {
-        let phone_number = getNumber(
-          item?.phone_number?.toString().replace(' ', '').replace('-', ''),
-        )
+        let phone_number = getNumber(item?.contact?.toString().replace(' ', '').replace('-', ''))
 
         if (phone_number.length < 13) {
           failed++
@@ -299,48 +310,75 @@ const DoctorDBS = () => {
 
         const { errors, data: newTodo } = await client.models.Client.create({
           category_id: name,
-          name: item.name ? item.name : 'No Name',
+          name: item.name ? item.name.concat(' ', item.father_name) : 'No Name',
           designation: item.designation ? item.designation : '',
           cnic: item.cnic ? item.cnic : '',
           hospital: item.hospital ? item.hospital : '',
           address: item.address ? item.address : '',
           phone_number: phone_number,
         })
-        const newContact = {
-          names: [
-            {
-              givenName: item.name,
-              familyName: '',
-            },
-          ],
-          emailAddresses: [
-            {
-              value: item.email,
-            },
-          ],
-          phoneNumbers: [
-            {
-              value: phone_number,
-            },
-          ],
-          addresses: [
-            {
-              streetAddress: item.address,
-              city: '',
-              region: '',
-              postalCode: '',
-              country: 'Pakistan',
-              type: '',
-            },
-          ],
+
+        if (g_login === true) {
+          const newContact = {
+            names: [
+              {
+                givenName: item.name,
+                familyName: '',
+              },
+            ],
+            emailAddresses: [
+              {
+                value: item.email,
+              },
+            ],
+            phoneNumbers: [
+              {
+                value: phone_number,
+              },
+            ],
+            addresses: [
+              {
+                streetAddress: item.address,
+                city: '',
+                region: '',
+                postalCode: '',
+                country: 'Pakistan',
+                type: '',
+              },
+            ],
+          }
+          await addContact(newContact)
         }
-        await addContact(newContact)
+
+
         if (newTodo !== null) {
           saved++
           save_digit.push(item.phone_number)
           setSavedReocrd(saved)
         } else {
-          failed++
+          if (errors.length > 0) {
+            if (errors[0].errorType === 'DynamoDB:ConditionalCheckFailedException') {
+              const toBeDeletedTodo = {
+                phone_number: phone_number,
+              }
+
+              await client.models.Client.delete(toBeDeletedTodo)
+
+              await client.models.Client.create({
+                category_id: name,
+                name: item.name ? item.name.concat(' ', item.father_name) : 'No Name',
+                designation: item.designation ? item.designation : '',
+                cnic: item.cnic ? item.cnic : '',
+                hospital: item.hospital ? item.hospital : '',
+                address: item.address ? item.address : '',
+                phone_number: phone_number,
+              })
+              saved++
+              setSavedReocrd(saved)
+            }
+          } else {
+            failed++
+          }
 
           failed_digit.push(item.phone_number)
           setFailedRecord(failed)
