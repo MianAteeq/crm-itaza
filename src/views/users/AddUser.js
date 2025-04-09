@@ -157,8 +157,6 @@ const AddUser = () => {
       setMessage('Something went wrong.');
     }
 
-
-
 }
 
 
