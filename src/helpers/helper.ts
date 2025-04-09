@@ -68,3 +68,15 @@ export const showErrorMessage = (message) => {
     })
  )
 };
+
+
+export const checkPermissionExist = (permission,permissions) => {
+
+  let exists=permissions.filter((item) => item === permission);
+  console.log(exists);
+  if(exists.length>0){
+    return true;
+  }else{
+    return false;
+    }
+};

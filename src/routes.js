@@ -25,6 +25,11 @@ import Chat from './views/Client/Chat'
 
 // import CategoryList from './views/categories/categoryList'
 
+import AddUser from './views/users/AddUser'
+import EditUser from './views/users/EditUser'
+import ViewUser from './views/users/ViewUser'
+import AllUser from './views/users/AllUser'
+
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -126,6 +131,10 @@ const routes = [
   { path: '/send/email', name: 'Send Email', element: SendEmail, exact: true },
   { path: '/edit/email', name: 'Edit Email', element: EditEmail, exact: true },
   { path: '/all/email', name: 'All Email', element: AllEmail, exact: true },
+
+  { path: '/add/user', name: 'Add User', element: AddUser, exact: true },
+  { path: '/edit/user', name: 'Edit User', element: EditUser, exact: true },
+  { path: '/all/users', name: 'All User', element: AllUser, exact: true },
   // { path: '/doctor/dbs/email', name: 'Doctor Dbs Email', element: DoctorDBSEmail, exact: true },
   // { path: '/doctor/mbs/email', name: 'Doctor MBS Email', element: DoctorMbsEmail, exact: true },
   // { path: '/patient/email', name: 'Patient Email ', element: PatientEmail, exact: true },

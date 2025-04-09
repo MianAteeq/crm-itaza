@@ -16,6 +16,7 @@ import { generateClient } from 'aws-amplify/data'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import DataTable from 'react-data-table-component'
+import { checkPermissionExist } from '../../helpers/helper'
 const client = generateClient()
 const CategoryList = () => {
   const [categories, setCategory] = useState([])
@@ -23,7 +24,7 @@ const CategoryList = () => {
   const [id, setID] = useState('')
   const [error, setError] = useState('')
   const [visible, setVisible] = useState(false)
-
+  let permissions = JSON.parse(localStorage.getItem('permissions'))
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.Category.list()
     setCategory(items)
@@ -90,21 +91,24 @@ const CategoryList = () => {
       name: 'Name',
       selector: (row) => row.name,
     },
-    {
-      name: 'Action',
-      selector: (row) => {
-        return (
-          <a
-            onClick={() => editRecord(row)}
-            style={{ cursor: 'pointer' }}
-            className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
-          >
-            Edit
-          </a>
-        )
-      },
-    },
   ]
+  let actions = {
+    name: 'Action',
+    selector: (row) => {
+      return (
+        <a
+          onClick={() => editRecord(row)}
+          style={{ cursor: 'pointer' }}
+          className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
+        >
+          Edit
+        </a>
+      )
+    },
+  }
+  if (checkPermissionExist('edit_category', permissions) === true) {
+    columns.push(actions)
+  }
 
   const createForm = () => {
     return (
@@ -141,17 +145,19 @@ const CategoryList = () => {
         <CCard className="mb-4">
           <CCardHeader>
             <strong>Categories</strong>{' '}
-            <CButton
-              color="primary"
-              style={{ float: 'right' }}
-              onClick={() => {
-                setVisible(!visible)
-                setName('')
-                setID('')
-              }}
-            >
-              Add Category
-            </CButton>
+            {checkPermissionExist('add_category', permissions) === true ? (
+              <CButton
+                color="primary"
+                style={{ float: 'right' }}
+                onClick={() => {
+                  setVisible(!visible)
+                  setName('')
+                  setID('')
+                }}
+              >
+                Add Category
+              </CButton>
+            ) : null}
           </CCardHeader>
           <CCardBody>
             <div className="overflow-x-auto">

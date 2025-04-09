@@ -19,7 +19,13 @@ import DataTable from 'react-data-table-component'
 import * as XLSX from 'xlsx'
 
 import { NavLink } from 'react-router-dom'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
+import {
+  checkPermissionExist,
+  getRoleStatusDownload,
+  getRoleStatusView,
+  savedLogs,
+  showSuccessMessage,
+} from '../../helpers/helper'
 const client = generateClient()
 const AllEmail = () => {
   const [categories, setCategory] = useState([])
@@ -37,6 +43,7 @@ const AllEmail = () => {
   const [savedRecord, setSavedReocrd] = useState(0)
   const [failedRecord, setFailedRecord] = useState(0)
   const role = localStorage.getItem('role')
+  let permissions = JSON.parse(localStorage.getItem('permissions'))
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.EmailList.list({
       limit: 50000,
@@ -149,30 +156,43 @@ const AllEmail = () => {
       name: 'CNIC',
       selector: (row) => (row.cnic ? row.cnic : 'N.A'),
     },
-
     {
       name: 'Action',
       selector: (row) => {
         return (
           <>
-            <NavLink to={{ pathname: '/view/email' }} state={JSON.stringify(row)}>
-              View
-            </NavLink>{' '}
-            <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
-            <NavLink to={{ pathname: '/edit/email' }} state={JSON.stringify(row)}>
-              Edit
-            </NavLink>{' '}
-            <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
-            <a
-              onClick={() => deleteRow(row)}
-              style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
-            >
-              Delete
-            </a>
+            <>
+              {checkPermissionExist('view_email', permissions) === true ? (
+                <>
+                  <NavLink to={{ pathname: '/view/email' }} state={JSON.stringify(row)}>
+                    View
+                  </NavLink>
+                  <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+                </>
+              ) : null}
+            </>{' '}
+            {checkPermissionExist('edit_email', permissions) === true ? (
+              <>
+                <NavLink to={{ pathname: '/edit/email' }} state={JSON.stringify(row)}>
+                  Edit
+                </NavLink>
+                <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+              </>
+            ) : null}
+            {checkPermissionExist('delete_email', permissions) === true ? (
+              <a
+                onClick={() => deleteRow(row)}
+                style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
+              >
+                Delete
+              </a>
+            ) : null}
           </>
         )
       },
     },
+
+
   ]
   const uploaderColumns = [
     {
@@ -428,7 +448,7 @@ const AllEmail = () => {
               />
               {categories.length > 0 ? (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? uploaderColumns : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination
@@ -441,7 +461,7 @@ const AllEmail = () => {
                 />
               ) : (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? uploaderColumns : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination

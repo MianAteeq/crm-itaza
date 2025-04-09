@@ -19,7 +19,13 @@ import DataTable from 'react-data-table-component'
 import * as XLSX from 'xlsx'
 
 import { NavLink, useLocation } from 'react-router-dom'
-import { getRoleStatusDownload, getRoleStatusView, savedLogs, showSuccessMessage } from '../../helpers/helper'
+import {
+  checkPermissionExist,
+  getRoleStatusDownload,
+  getRoleStatusView,
+  savedLogs,
+  showSuccessMessage,
+} from '../../helpers/helper'
 const client = generateClient()
 const DoctorDBSEmail = () => {
   const [categories, setCategory] = useState([])
@@ -39,6 +45,7 @@ const DoctorDBSEmail = () => {
   const [savedRecord, setSavedReocrd] = useState(0)
   const [failedRecord, setFailedRecord] = useState(0)
   const role = localStorage.getItem('role')
+  let permissions = JSON.parse(localStorage.getItem('permissions'))
   const fetchTodos = async () => {
     const { data: items, errors } = await client.models.EmailList.list({
       limit: 200000,
@@ -192,20 +199,32 @@ const DoctorDBSEmail = () => {
       selector: (row) => {
         return (
           <>
-            <NavLink to={{ pathname: '/view/email' }} state={JSON.stringify(row)}>
-              View
-            </NavLink>{' '}
-            <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
-            <NavLink to={{ pathname: '/edit/email' }} state={JSON.stringify(row)}>
-              Edit
-            </NavLink>{' '}
-            <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
-            <a
-              onClick={() => deleteRow(row)}
-              style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
-            >
-              Delete
-            </a>
+            <>
+              {checkPermissionExist('view_email', permissions) === true ? (
+                <>
+                  <NavLink to={{ pathname: '/view/email' }} state={JSON.stringify(row)}>
+                    View
+                  </NavLink>
+                  <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+                </>
+              ) : null}
+            </>{' '}
+            {checkPermissionExist('edit_email', permissions) === true ? (
+              <>
+                <NavLink to={{ pathname: '/edit/email' }} state={JSON.stringify(row)}>
+                  Edit
+                </NavLink>
+                <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+              </>
+            ) : null}
+            {checkPermissionExist('delete_email', permissions) === true ? (
+              <a
+                onClick={() => deleteRow(row)}
+                style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
+              >
+                Delete
+              </a>
+            ) : null}
           </>
         )
       },
@@ -463,7 +482,7 @@ const DoctorDBSEmail = () => {
               />
               {categories.length > 0 ? (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? uploaderColumns : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination
@@ -476,7 +495,7 @@ const DoctorDBSEmail = () => {
                 />
               ) : (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? uploaderColumns : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination

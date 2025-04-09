@@ -42,12 +42,13 @@
     "cross-env": "^7.0.3",
     "flowbite-react": "^0.10.2",
     "gapi-script": "^1.2.0",
+    "mdb-react-ui-kit": "^9.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
-    "react-froala-wysiwyg": "^4.4.0",
     "react-data-table-component": "^7.6.2",
     "react-dom": "^18.3.1",
     "react-draft-wysiwyg": "^1.15.0",
+    "react-froala-wysiwyg": "^4.4.0",
     "react-google-login": "^5.2.2",
     "react-imask": "^7.6.1",
     "react-quill": "^2.0.0",
@@ -61,9 +62,7 @@
     "simplebar-react": "^3.2.6",
     "styled-components": "^6.1.14",
     "wait-on": "^8.0.2",
-    "mdb-react-ui-kit": "^9.0.0",
     "xlsx": "^0.18.5"
-    
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.8.0",

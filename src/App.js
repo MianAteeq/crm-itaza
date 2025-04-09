@@ -20,6 +20,7 @@ const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 import { getCurrentUser } from 'aws-amplify/auth'
 import { ToastContainer } from 'react-toastify'
+import axios from 'axios'
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
@@ -42,17 +43,15 @@ const App = () => {
     setData()
   }, [])
   const setData = async () => {
-    localStorage.setItem('cats', JSON.stringify(await getCats()))
     const { username, userId, signInDetails } = await getCurrentUser()
-    let email = signInDetails.loginId
-    localStorage.setItem('email', email)
-    if (email === 'admin@iadsr.edu.pk') {
-      localStorage.setItem('role', 'ADMIN')
-    } else if (email === 'Assistant@iadsr.edu.pk') {
-      localStorage.setItem('role', 'EDITOR')
-    } else {
-      localStorage.setItem('role', 'UPLOADER')
-    }
+
+    const response = await axios.post('https://iadsr.fissionmonster.com/api/get/user/permissions', {
+      vender_id: userId,
+    })
+    console.log(response.data.data)
+    localStorage.setItem('cats', JSON.stringify(await getCats()))
+
+    localStorage.setItem('permissions', JSON.stringify(response.data.data))
   }
   useEffect(() => {
     initGoogleAPI()

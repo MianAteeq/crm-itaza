@@ -21,6 +21,7 @@ import * as XLSX from 'xlsx'
 import { NavLink } from 'react-router-dom'
 import { addContact } from '../../helpers/GoogleAuth'
 import {
+  checkPermissionExist,
   getRoleStatusDownload,
   getRoleStatusView,
   savedLogs,
@@ -46,7 +47,7 @@ const AllContact = () => {
   const [name, setName] = useState('')
   const role = localStorage.getItem('role')
   const [g_login, setGLogin] = useState(false)
-
+  let permissions = JSON.parse(localStorage.getItem('permissions'))
   console.log(role)
 
   const fetchTodos = async () => {
@@ -179,48 +180,38 @@ const AllContact = () => {
         return (
           <>
             <>
-              <NavLink to={{ pathname: '/view/client' }} state={JSON.stringify(row)}>
-                View
-              </NavLink>
-              <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+              {checkPermissionExist('view_contact', permissions) === true ? (
+                <>
+                  <NavLink to={{ pathname: '/view/client' }} state={JSON.stringify(row)}>
+                    View
+                  </NavLink>
+                  <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+                </>
+              ) : null}
             </>{' '}
-            <NavLink to={{ pathname: '/edit/client' }} state={JSON.stringify(row)}>
-              Edit
-            </NavLink>{' '}
-            <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
-            <a
-              onClick={() => deleteRow(row)}
-              style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
-            >
-              Delete
-            </a>
+            {checkPermissionExist('edit_contact', permissions) === true ? (
+              <>
+                <NavLink to={{ pathname: '/edit/client' }} state={JSON.stringify(row)}>
+                  Edit
+                </NavLink>
+                <span style={{ color: 'black', marginRight: 5, marginLeft: 5 }}>|</span>
+              </>
+            ) : null}
+            {checkPermissionExist('delete_contact', permissions) === true ? (
+              <a
+                onClick={() => deleteRow(row)}
+                style={{ color: 'red', marginLeft: 5, cursor: 'pointer' }}
+              >
+                Delete
+              </a>
+            ) : null}
           </>
         )
       },
     },
   ]
-  const columnsUploader = [
-    {
-      name: 'ID',
-      selector: (row, i) => i + 1,
-    },
-    {
-      name: 'Category',
-      selector: (row) => row.category_id,
-    },
-    {
-      name: 'Name',
-      selector: (row) => row.name,
-    },
-    {
-      name: 'Phone No',
-      selector: (row) => row.phone_number,
-    },
-    {
-      name: 'CNIC',
-      selector: (row) => (row.cnic ? row.cnic : 'N.A'),
-    },
-  ]
+
+  const columnsUploader = []
 
   const getNumber = (phone_number) => {
     if (phone_number === undefined) {
@@ -324,7 +315,6 @@ const AllContact = () => {
             failed++
             setFailedRecord(failed)
           }
-
         }
       } else {
         failed++
@@ -478,7 +468,7 @@ const AllContact = () => {
               />
               {categories.length > 0 ? (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? columnsUploader : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination
@@ -491,7 +481,7 @@ const AllContact = () => {
                 />
               ) : (
                 <DataTable
-                  columns={getRoleStatusView(role) === false ? columnsUploader : columns}
+                  columns={getRoleStatusView(role) === false ? columns : columns}
                   data={filteredItems}
                   progressPending={loadingTable}
                   pagination

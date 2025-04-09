@@ -10,7 +10,7 @@ yarn.lock
 
 # production
 /build
-
+/out
 # misc
 .eslintcache
 .history
