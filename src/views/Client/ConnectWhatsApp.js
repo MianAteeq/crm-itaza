@@ -24,6 +24,10 @@ const ConnectWhatsApp = () => {
     }
   }
 
+   const showCode = (qrData) => {
+    const encoded = encodeURIComponent(qrData)
+    return  `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`
+  }
   return (
     <CRow>
       <CCol xs={12}>
@@ -33,7 +37,7 @@ const ConnectWhatsApp = () => {
           </CCardHeader>
           <CCardBody>
             <img
-              src={qr_code}
+              src={showCode(qr_code)}
               style={{
                 display: 'block',
                 marginLeft: 'auto',
