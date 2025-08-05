@@ -149,7 +149,8 @@ const SendMessage = () => {
           formattedNumber: res.me.formattedNumber,
         })
         setPageLoading(false)
-      }
+      }else{
+          setPageLoading(false)
     })
   }
 
