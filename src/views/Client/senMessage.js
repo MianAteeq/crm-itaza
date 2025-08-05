@@ -141,7 +141,7 @@ const SendMessage = () => {
   const getWaData = async () => {
     await axios.get('https://iadsr.fissionmonster.com/api/get/wa/status').then(async (response) => {
       if (response.data.status === true) {
-        let res = response.data.data
+        let res = response.data
         setWaInstance({
          instanceId: res.me.instanceId,
           displayName: res.me.displayName,
