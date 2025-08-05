@@ -143,10 +143,10 @@ const SendMessage = () => {
       if (response.data.status === true) {
         let res = response.data.data
         setWaInstance({
-          instanceId: res.instanceId,
-          displayName: res.data.displayName,
-          contactId: res.data.contactId,
-          formattedNumber: res.data.formattedNumber,
+         instanceId: res.me.instanceId,
+          displayName: res.me.displayName,
+          contactId: res.me.contactId,
+          formattedNumber: res.me.formattedNumber,
         })
         setPageLoading(false)
       }
