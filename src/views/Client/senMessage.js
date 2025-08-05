@@ -151,6 +151,7 @@ const SendMessage = () => {
         setPageLoading(false)
       }else{
           setPageLoading(false)
+      }
     })
   }
 
