@@ -52,6 +52,15 @@ const App = () => {
     localStorage.setItem('cats', JSON.stringify(await getCats()))
 
     localStorage.setItem('permissions', JSON.stringify(response.data.data))
+     let email = signInDetails.loginId
+    localStorage.setItem('email', email)
+    if (email === 'admin@iadsr.edu.pk') {
+      localStorage.setItem('role', 'ADMIN')
+    } else if (email === 'Assistant@iadsr.edu.pk') {
+      localStorage.setItem('role', 'EDITOR')
+    } else {
+      localStorage.setItem('role', 'UPLOADER')
+    }
   }
   useEffect(() => {
     initGoogleAPI()
