@@ -474,7 +474,7 @@ const AllContact = () => {
                   pagination
                   actions={
                     getRoleStatusDownload(role) === true ? (
-                      <Export onExport={() => downloadCSV(categories)} />
+                      <Export onExport={() => downloadCSV(filteredItems)} />
                     ) : null
                   }
                   paginationResetDefaultPage={resetPaginationToggle} // optionally, a hook to reset pagination to page 1
