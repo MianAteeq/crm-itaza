@@ -426,6 +426,8 @@ const DoctorDBSEmail = () => {
     return result
   }
   async function downloadCSV(array) {
+    let array=categories;
+    console.log(categories);
     const link = document.createElement('a')
     let csv = convertArrayOfObjectsToCSV(array)
     if (csv == null) return
