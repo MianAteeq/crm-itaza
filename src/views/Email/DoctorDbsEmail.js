@@ -425,27 +425,46 @@ const DoctorDBSEmail = () => {
 
     return result
   }
-  async function downloadCSV(array) {
-    let array=categories;
-    console.log(categories);
-    const link = document.createElement('a')
-    let csv = convertArrayOfObjectsToCSV(array)
-    if (csv == null) return
+  // async function downloadCSV(array) {
+  //   console.log(categories);
+  //   const link = document.createElement('a')
+  //   let csv = convertArrayOfObjectsToCSV(array)
+  //   if (csv == null) return
 
-    const filename = 'export.csv'
+  //   const filename = 'export.csv'
 
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = `data:text/csv;charset=utf-8,${csv}`
-    }
+  //   if (!csv.match(/^data:text\/csv/i)) {
+  //     csv = `data:text/csv;charset=utf-8,${csv}`
+  //   }
 
-    link.setAttribute('href', encodeURI(csv))
-    link.setAttribute('download', filename)
-    link.click()
-    let obj = {
-      message: `Download ${name} EMAIL`,
-    }
-    await savedLogs('DOWNLOAD EMAIL', obj)
+  //   link.setAttribute('href', encodeURI(csv))
+  //   link.setAttribute('download', filename)
+  //   link.click()
+  //   let obj = {
+  //     message: `Download ${name} EMAIL`,
+  //   }
+  //   await savedLogs('DOWNLOAD EMAIL', obj)
+  // }
+
+async function downloadCSV() {
+  const array = categories
+  if (!array || array.length === 0) {
+    alert('No data to export')
+    return
   }
+
+  const csv = convertArrayOfObjectsToCSV(array)
+  if (!csv) return
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `${name}-email-list.csv`
+  link.click()
+
+  await savedLogs('DOWNLOAD EMAIL', { message: `Downloaded ${name} EMAIL list` })
+}
+
   const Export = ({ onExport }) => (
     <CButton color="primary" onClick={(e) => onExport(e.target.value)}>
       Export
